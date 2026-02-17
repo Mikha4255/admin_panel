@@ -1,0 +1,101 @@
+body {
+    background: #1a0c03;
+    color: #ebdecc;
+    font-family: Arial, sans-serif;
+    padding: 15px;
+    margin: 0;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #ff6600;
+    margin: 15px 0;
+}
+
+.controls {
+    text-align: center;
+    margin: 20px 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.controls button {
+    padding: 10px 14px;
+    font-size: 14px;
+    min-width: 120px;
+}
+
+button {
+    margin: 6px;
+    padding: 12px 18px;
+    font-size: 16px;
+    background: #ff6600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: auto;
+}
+
+button:hover {
+    background: #e16200;
+}
+
+pre {
+    background: #2a2827;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 15px auto 25px;
+    overflow-x: auto;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.remove-user, .add-to-backup {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.remove-user input,
+.add-to-backup textarea {
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    max-width: 300px;
+    border-radius: 8px;
+    border: none;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+
+.remove-user button,
+.add-to-backup button {
+    background: #e74c3c;
+    color: #fff;
+    width: 100%;
+    max-width: 300px;
+}
+
+.remove-user button:hover,
+.add-to-backup button:hover {
+    background: #c0392b;
+}
+
+#clearMain, #clearBackup {
+    background: #8e44ad !important;
+}
+
+#clearMain:hover, #clearBackup:hover {
+    background: #7d3c98 !important;
+}
+
+#addToBackup {
+    background: #2ecc71 !important;
+    color: #111 !important;
+}
+
+#addToBackup:hover {
+    background: #27ae60 !important;
+}
