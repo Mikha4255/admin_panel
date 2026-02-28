@@ -178,6 +178,26 @@ async function removeUserByKey(url, view, userKey, inputId) {
 
 /* ---------- СТАТИСТИКА ---------- */
 function renderStats(data) {
+    // === Подсчёт голосов по номинациям ===
+    const counts = {};
+    for (const key in data) {
+        const entry = data[key];
+        let nominations = [];
+
+        if (Array.isArray(entry)) {
+            nominations = entry;
+        } else if (entry && typeof entry === 'object' && Array.isArray(entry.nominations)) {
+            nominations = entry.nominations;
+        }
+
+        for (const nom of nominations) {
+            counts[nom] = (counts[nom] || 0) + 1;
+        }
+    }
+
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+    // === Текстовый вывод (оставляем) ===
     let statsBlock = document.getElementById('stats');
     if (!statsBlock) {
         statsBlock = document.createElement('div');
@@ -185,26 +205,64 @@ function renderStats(data) {
         document.body.appendChild(statsBlock);
     }
 
-    const counts = {};
-    Object.values(data).forEach(list => {
-        if (!Array.isArray(list)) return;
-        list.forEach(nom => {
-            counts[nom] = (counts[nom] || 0) + 1;
-        });
-    });
-
-    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     let html = `<h2>📊 Подсчёт голосов</h2><pre>`;
     sorted.forEach(([name, count]) => {
         html += `${name}: ${count}\n`;
     });
     html += `</pre>`;
-
-    html += `<h2>🏆 Рейтинг номинаций</h2><pre>`;
-    sorted.forEach(([name, count], i) => {
-        html += `${i + 1}. ${name} — ${count}\n`;
-    });
-    html += `</pre>`;
-
     statsBlock.innerHTML = html;
+
+    // === ДИАГРАММА: только если есть данные и canvas существует ===
+    const canvas = document.getElementById('nominationsChart');
+    if (!canvas || sorted.length === 0) return;
+
+    // Удаляем старую диаграмму, если есть
+    const oldChart = Chart.getChart(canvas);
+    if (oldChart) oldChart.destroy();
+
+    // Ограничиваем количество номинаций (например, до 15 самых популярных)
+    const maxToShow = 15;
+    const displayData = sorted.slice(0, maxToShow);
+
+    // Создаём новую диаграмму
+    new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: displayData.map(([name]) => name),
+            datasets: [{
+                label: 'Голоса',
+                data: displayData.map(([, count]) => count),
+                backgroundColor: '#ff6600',
+                borderColor: '#ff4800',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 300 // быстрая анимация
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#ebdecc' },
+                    grid: { color: 'rgba(255,102,0,0.1)' }
+                },
+                x: {
+                    ticks: { 
+                        color: '#ebdecc',
+                        autoSkip: true,
+                        maxRotation: 30,
+                        minRotation: 30
+                    },
+                    grid: { display: false }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: true }
+            }
+        }
+    });
 }
