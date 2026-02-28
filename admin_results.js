@@ -1,4 +1,4 @@
-// === ШИФРОВАНИЕ (ключ спрятан) ===
+// === ОБФУСЦИРОВАННЫЙ МОДУЛЬ ШИФРОВАНИЯ ===
 const _k = String.fromCharCode(83,65,66,76) + "2026";
 
 async function _enc(txt, pwd) {
@@ -80,7 +80,6 @@ async function postData(url, data) {
 document.getElementById('loadMain').addEventListener('click', async () => {
     const data = await getData(STORAGE_MAIN);
     mainView.textContent = JSON.stringify(data, null, 2);
-    renderStats(data);
 });
 
 document.getElementById('loadBackup').addEventListener('click', async () => {
@@ -91,49 +90,13 @@ document.getElementById('loadBackup').addEventListener('click', async () => {
 /* ---------- BACKUP ---------- */
 document.getElementById('copyStorage').addEventListener('click', async () => {
     const data = await getData(STORAGE_MAIN);
+    if (Object.keys(data).length === 0) {
+        alert('Основное хранилище пустое');
+        return;
+    }
     if (await postData(STORAGE_BACKUP, data)) {
         backupView.textContent = JSON.stringify(data, null, 2);
         alert('Backup создан');
-    }
-});
-
-/* ---------- УДАЛИТЬ ВСЁ — ОТДЕЛЬНО ДЛЯ КАЖДОГО ХРАНИЛИЩА ---------- */
-document.getElementById('clearMain').addEventListener('click', async () => {
-    if (!confirm('⚠️ Удалить ВСЕ данные из основного хранилища?')) return;
-    
-    if (await postData(STORAGE_MAIN, {})) {
-        mainView.textContent = '{}';
-        document.getElementById('stats').innerHTML = '';
-        alert('Основное хранилище очищено');
-    }
-});
-
-document.getElementById('clearBackup').addEventListener('click', async () => {
-    if (!confirm('⚠️ Удалить ВСЕ данные из backup-хранилища?')) return;
-    
-    if (await postData(STORAGE_BACKUP, {})) {
-        backupView.textContent = '{}';
-        alert('Backup-хранилище очищено');
-    }
-});
-
-/* ---------- ДОБАВИТЬ В BACKUP ВРУЧНУЮ ---------- */
-document.getElementById('addToBackup').addEventListener('click', async () => {
-    const raw = document.getElementById('manualData').value.trim();
-    if (!raw) return alert('Введите данные в формате JSON');
-
-    try {
-        const newData = JSON.parse(raw);
-        const current = await getData(STORAGE_BACKUP);
-        const merged = { ...current, ...newData };
-
-        if (await postData(STORAGE_BACKUP, merged)) {
-            backupView.textContent = JSON.stringify(merged, null, 2);
-            document.getElementById('manualData').value = '';
-            alert('Данные добавлены в backup');
-        }
-    } catch (e) {
-        alert('Неверный формат JSON');
     }
 });
 
@@ -152,9 +115,11 @@ document.getElementById('removeUserBackupBtn').addEventListener('click', () => {
 
 async function removeUserByKey(url, view, userKey, inputId) {
     const data = await getData(url);
+    const keys = Object.keys(data);
+
     if (!data[userKey]) {
         const fioOnly = userKey.split('|')[0];
-        const matches = Object.keys(data).filter(k => k.startsWith(fioOnly + '|'));
+        const matches = keys.filter(k => k.startsWith(fioOnly + '|'));
         if (matches.length > 0) {
             let msg = `Не найден точный ключ "${userKey}".\n\nВозможные варианты:\n`;
             msg += matches.map(m => `- ${m}`).join('\n');
@@ -165,24 +130,38 @@ async function removeUserByKey(url, view, userKey, inputId) {
         return;
     }
 
-    // Удаляем без проверки на "последнего"
+    if (keys.length <= 1) {
+        alert('Нельзя удалить последнего голосующего');
+        return;
+    }
+
+    if (!confirm(`Удалить запись:\n"${userKey}"?`)) return;
+
     delete data[userKey];
 
     if (await postData(url, data)) {
         view.textContent = JSON.stringify(data, null, 2);
         document.getElementById(inputId).value = '';
         alert('Удалено успешно');
-        if (url === STORAGE_MAIN) renderStats(data);
     }
 }
+// === ФУНКЦИЯ: получить статистику по номинациям ===
+async function getNominationStats() {
+    const data = await getData(STORAGE_MAIN);
+    if (!data || Object.keys(data).length === 0) {
+        return null;
+    }
 
-/* ---------- СТАТИСТИКА ---------- */
-function renderStats(data) {
-    // === Подсчёт голосов по номинациям ===
-    const counts = {};
-    for (const key in data) {
-        const entry = data[key];
-        let nominations = [];
+    var counts = {};
+    var key;
+    var entry;
+    var nominations;
+    var i;
+    var nom;
+
+    for (key in data) {
+        entry = data[key];
+        nominations = [];
 
         if (Array.isArray(entry)) {
             nominations = entry;
@@ -190,79 +169,153 @@ function renderStats(data) {
             nominations = entry.nominations;
         }
 
-        for (const nom of nominations) {
-            counts[nom] = (counts[nom] || 0) + 1;
-        }
-    }
-
-    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-
-    // === Текстовый вывод (оставляем) ===
-    let statsBlock = document.getElementById('stats');
-    if (!statsBlock) {
-        statsBlock = document.createElement('div');
-        statsBlock.id = 'stats';
-        document.body.appendChild(statsBlock);
-    }
-
-    let html = `<h2>📊 Подсчёт голосов</h2><pre>`;
-    sorted.forEach(([name, count]) => {
-        html += `${name}: ${count}\n`;
-    });
-    html += `</pre>`;
-    statsBlock.innerHTML = html;
-
-    // === ДИАГРАММА: только если есть данные и canvas существует ===
-    const canvas = document.getElementById('nominationsChart');
-    if (!canvas || sorted.length === 0) return;
-
-    // Удаляем старую диаграмму, если есть
-    const oldChart = Chart.getChart(canvas);
-    if (oldChart) oldChart.destroy();
-
-    // Ограничиваем количество номинаций (например, до 15 самых популярных)
-    const maxToShow = 15;
-    const displayData = sorted.slice(0, maxToShow);
-
-    // Создаём новую диаграмму
-    new Chart(canvas, {
-        type: 'bar',
-        data: {
-            labels: displayData.map(([name]) => name),
-            datasets: [{
-                label: 'Голоса',
-                data: displayData.map(([, count]) => count),
-                backgroundColor: '#ff6600',
-                borderColor: '#ff4800',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: {
-                duration: 300 // быстрая анимация
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#ebdecc' },
-                    grid: { color: 'rgba(255,102,0,0.1)' }
-                },
-                x: {
-                    ticks: { 
-                        color: '#ebdecc',
-                        autoSkip: true,
-                        maxRotation: 30,
-                        minRotation: 30
-                    },
-                    grid: { display: false }
-                }
-            },
-            plugins: {
-                legend: { display: false },
-                tooltip: { enabled: true }
+        for (i = 0; i < nominations.length; i++) {
+            nom = nominations[i];
+            if (counts[nom]) {
+                counts[nom] = counts[nom] + 1;
+            } else {
+                counts[nom] = 1;
             }
         }
+    }
+
+    // Сортировка
+    var sorted = [];
+    var name;
+    for (name in counts) {
+        sorted.push([name, counts[name]]);
+    }
+    sorted.sort(function(a, b) {
+        return b[1] - a[1];
     });
+
+    return sorted;
 }
+
+// === КНОПКА: Статистика ===
+document.getElementById('showStats').addEventListener('click', function() {
+    var container = document.getElementById('stats-block');
+    if (container.style.display === 'block') {
+        container.style.display = 'none';
+        return;
+    }
+
+    getNominationStats().then(function(stats) {
+        if (!stats) {
+            alert('Нет данных');
+            return;
+        }
+
+        var text = '';
+        var i;
+        for (i = 0; i < stats.length; i++) {
+            text = text + stats[i][0] + ': ' + stats[i][1] + '\n';
+        }
+        document.getElementById('stats-text').textContent = text;
+        container.style.display = 'block';
+    });
+});
+
+// === КНОПКА: Рейтинг ===
+document.getElementById('showRating').addEventListener('click', function() {
+    var container = document.getElementById('rating-block');
+    if (container.style.display === 'block') {
+        container.style.display = 'none';
+        return;
+    }
+
+    getNominationStats().then(function(stats) {
+        if (!stats) {
+            alert('Нет данных');
+            return;
+        }
+
+        var text = '';
+        var i;
+        for (i = 0; i < stats.length; i++) {
+            text = text + (i + 1) + '. ' + stats[i][0] + ' — ' + stats[i][1] + '\n';
+        }
+        document.getElementById('rating-text').textContent = text;
+        container.style.display = 'block';
+    });
+});
+
+// === КНОПКА: Диаграмма ===
+document.getElementById('showChart').addEventListener('click', function() {
+    var container = document.getElementById('chart-block');
+    if (container.style.display === 'block') {
+        container.style.display = 'none';
+        return;
+    }
+
+    getNominationStats().then(function(stats) {
+        if (!stats) {
+            alert('Нет данных');
+            return;
+        }
+
+        var canvas = document.getElementById('nominationsChart');
+        var oldChart = Chart.getChart(canvas);
+        if (oldChart) {
+            oldChart.destroy();
+        }
+
+        // Ограничиваем до 15 номинаций
+        var displayData = stats.slice(0, 15);
+        
+        // Создаём массивы для Chart.js
+        var labels = [];
+        var dataValues = [];
+        var i;
+        for (i = 0; i < displayData.length; i++) {
+            labels.push(displayData[i][0]);
+            dataValues.push(displayData[i][1]);
+        }
+
+        // Создаём диаграмму
+        var ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Голоса',
+                    data: dataValues,
+                    backgroundColor: '#ff6600',
+                    borderColor: '#ff4800',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 300
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#ebdecc'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#ebdecc',
+                            autoSkip: true,
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        container.style.display = 'block';
+    });
+});

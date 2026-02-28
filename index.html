@@ -2,9 +2,10 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админ — голосование</title>
+    <title>🛠 Админ — голосование</title>
     <link rel="stylesheet" href="admin_results.css">
+    <!-- Chart.js для диаграммы -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -14,8 +15,11 @@
     <button id="loadMain">📥 Показать основное</button>
     <button id="loadBackup">📂 Показать backup</button>
     <button id="copyStorage">📦 Сделать backup</button>
-    <button id="clearMain">🗑️ Очистить основное</button>
-    <button id="clearBackup">🗑️ Очистить backup</button>
+    
+    <!-- НОВЫЕ КНОПКИ -->
+    <button id="showStats">📊 Статистика</button>
+    <button id="showRating">🏆 Рейтинг</button>
+    <button id="showChart">📈 Диаграмма</button>
 </div>
 
 <div class="remove-user">
@@ -30,26 +34,30 @@
     <button id="removeUserBackupBtn">Удалить</button>
 </div>
 
-<div class="add-to-backup">
-    <h2>➕ Добавить данные в backup</h2>
-    <textarea id="manualData" placeholder='{"ключ":"значение"}' rows="4"></textarea>
-    <button id="addToBackup">Добавить в backup</button>
-</div>
-
 <h2>📊 Основное хранилище</h2>
 <pre id="mainView">Пусто</pre>
 
 <h2>🗄 Backup-хранилище</h2>
 <pre id="backupView">Пусто</pre>
 
-<div id="stats"></div>
-
-<div style="width: 90%; max-width: 800px; height: 400px; margin: 30px auto;">
-    <h2 style="color: #ff6f00; text-align: center;">📊 Голоса по номинациям</h2>
-    <canvas id="nominationsChart"></canvas>
+<!-- Контейнеры для статистики -->
+<div id="stats-block" style="display: none; margin-top: 40px;">
+    <h2>📊 Подсчёт голосов</h2>
+    <pre id="stats-text"></pre>
 </div>
 
-<script src="admin_results.js"></script> 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div id="rating-block" style="display: none; margin-top: 40px;">
+    <h2>🏆 Рейтинг номинаций</h2>
+    <pre id="rating-text"></pre>
+</div>
+
+<div id="chart-block" style="display: none; margin-top: 40px;">
+    <h2>📈 Диаграмма голосов</h2>
+    <div style="width: 90%; max-width: 800px; height: 400px; margin: 20px auto;">
+        <canvas id="nominationsChart"></canvas>
+    </div>
+</div>
+
+<script src="admin_results.js"></script>
 </body>
 </html>
