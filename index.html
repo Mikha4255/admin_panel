@@ -2,62 +2,279 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>🛠 Админ — голосование</title>
-    <link rel="stylesheet" href="admin_results.css">
-    <!-- Chart.js для диаграммы -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABL 2027 - Админ панель</title>
+    <style>
+        :root { --bg: #070401; --card: #1f0803; --text: #f2e6d4; --accent: #ff4d00; --danger: #840000; --success: #2ecc71; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Bellota', system-ui, sans-serif; padding: 20px; line-height: 1.5; }
+        h1, h2 { color: var(--accent); text-align: center; margin-bottom: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        .tabs { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap; }
+        .tab-btn { padding: 12px 24px; background: var(--card); border: 2px solid var(--accent); color: var(--accent); cursor: pointer; border-radius: 12px; font-weight: bold; font-size: 16px; transition: all 0.2s; }
+        .tab-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .tab-btn.active { background: var(--accent); color: var(--bg); }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .form-group { background: var(--card); padding: 25px; border-radius: 16px; margin-bottom: 25px; border: 1px solid rgba(255,77,0,0.2); }
+        input, select { width: 100%; padding: 12px 15px; margin: 8px 0 15px; background: var(--bg); border: 2px solid rgba(255,77,0,0.3); color: var(--text); border-radius: 10px; font-size: 16px; font-family: inherit; transition: border-color 0.2s; }
+        input:focus, select:focus { outline: none; border-color: var(--accent); }
+        button.action { width: 100%; padding: 14px; background: var(--accent); border: none; color: var(--bg); font-weight: bold; border-radius: 10px; cursor: pointer; font-size: 16px; transition: opacity 0.2s; }
+        button.action:hover { opacity: 0.9; }
+        
+        .list-item { background: var(--card); padding: 16px 20px; margin-bottom: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent); transition: background 0.2s; }
+        .list-item:hover { background: #2a1208; }
+        .delete-btn { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+        .delete-btn:hover { background: #a00000; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: left; padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        th { color: var(--accent); font-weight: bold; }
+        tr:hover td { background: rgba(255,77,0,0.03); }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: var(--card); padding: 25px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,77,0,0.2); }
+        .stat-num { font-size: 36px; font-weight: bold; color: var(--accent); margin-bottom: 5px; }
+        .stat-label { font-size: 14px; opacity: 0.8; }
+        
+        @media (max-width: 600px) {
+            .tabs { flex-direction: column; }
+            .tab-btn { width: 100%; text-align: center; }
+            table { font-size: 14px; }
+            th, td { padding: 10px 8px; }
+            .list-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .delete-btn { width: 100%; }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🛠 Админ-панель SABL 2027</h1>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('noms')">📋 Номинации</button>
+            <button class="tab-btn" onclick="switchTab('votes')">🗳️ Голоса</button>
+            <button class="tab-btn" onclick="switchTab('stats')">📊 Статистика</button>
+        </div>
 
-<h1>🛠 Админ-панель голосования</h1>
+        <!-- Вкладка: Номинации -->
+        <div id="noms" class="tab-content active">
+            <div class="form-group">
+                <h2>Добавить новую номинацию</h2>
+                <input type="text" id="newNomInput" placeholder="Название номинации..." autocomplete="off">
+                <button class="action" onclick="addNomination()">➕ Добавить в список</button>
+            </div>
+            <h2>Текущий список номинаций (<span id="nomsCount">0</span>)</h2>
+            <div id="nomsList"></div>
+        </div>
 
-<div class="controls">
-    <button id="loadMain">📥 Показать основное</button>
-    <button id="loadBackup">📂 Показать backup</button>
-    <button id="copyStorage">📦 Сделать backup</button>
-    
-    <!-- НОВЫЕ КНОПКИ -->
-    <button id="showStats">📊 Статистика</button>
-    <button id="showRating">🏆 Рейтинг</button>
-    <button id="showChart">📈 Диаграмма</button>
-</div>
+        <!-- Вкладка: Голоса -->
+        <div id="votes" class="tab-content">
+            <div class="form-group">
+                <h2>Управление голосами</h2>
+                <input type="text" id="searchUser" placeholder=" Поиск по ФИО или классу..." oninput="filterVotes()" autocomplete="off">
+                <div style="display:flex; gap:10px; margin-top:10px; flex-wrap: wrap;">
+                    <select id="editUserSelect" style="flex:1; min-width: 200px;"><option value="">Выберите пользователя...</option></select>
+                    <button class="action" style="width:auto; min-width: 150px;" onclick="loadUserForEdit()">✏️ Редактировать</button>
+                </div>
+                <div id="editArea" style="margin-top:20px; display:none; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px;">
+                    <p id="editUserName" style="color:var(--accent); font-weight:bold; margin-bottom: 15px; font-size: 18px;"></p>
+                    <div id="editCheckboxes" style="max-height: 300px; overflow-y: auto; padding-right: 10px;"></div>
+                    <button class="action" style="margin-top:15px; background:var(--success);" onclick="saveEditedVote()">💾 Сохранить изменения</button>
+                </div>
+            </div>
+            <h2>Все проголосовавшие (<span id="votersCount">0</span>)</h2>
+            <div style="overflow-x: auto;">
+                <table id="votesTable">
+                    <thead><tr><th>Пользователь</th><th>Выбор (6 номинаций)</th><th>Действия</th></tr></thead>
+                    <tbody id="votesBody"></tbody>
+                </table>
+            </div>
+        </div>
 
-<div class="remove-user">
-    <h2>❌ Удалить пользователя (основное)</h2>
-    <input id="removeFIO" placeholder="Фамилия Имя|Класс (например: Иванов Иван|10Б)">
-    <button id="removeUserBtn">Удалить</button>
-</div>
-
-<div class="remove-user">
-    <h2>❌ Удалить пользователя (backup)</h2>
-    <input id="removeFIOBackup" placeholder="Фамилия Имя|Класс (например: Петров Пётр|9А)">
-    <button id="removeUserBackupBtn">Удалить</button>
-</div>
-
-<h2>📊 Основное хранилище</h2>
-<pre id="mainView">Пусто</pre>
-
-<h2>🗄 Backup-хранилище</h2>
-<pre id="backupView">Пусто</pre>
-
-<!-- Контейнеры для статистики -->
-<div id="stats-block" style="display: none; margin-top: 40px;">
-    <h2>📊 Подсчёт голосов</h2>
-    <pre id="stats-text"></pre>
-</div>
-
-<div id="rating-block" style="display: none; margin-top: 40px;">
-    <h2>🏆 Рейтинг номинаций</h2>
-    <pre id="rating-text"></pre>
-</div>
-
-<div id="chart-block" style="display: none; margin-top: 40px;">
-    <h2>📈 Диаграмма голосов</h2>
-    <div style="width: 90%; max-width: 800px; height: 400px; margin: 20px auto;">
-        <canvas id="nominationsChart"></canvas>
+        <!-- Вкладка: Статистика -->
+        <div id="stats" class="tab-content">
+            <div class="stats-grid" id="statsGrid"></div>
+            <h2>Рейтинг номинаций</h2>
+            <div id="ratingList"></div>
+        </div>
     </div>
-</div>
 
-<script src="admin_results.js"></script>
+    <script>
+        const FIREBASE_URL = 'https://vote-1535-sabl-default-rtdb.europe-west1.firebasedatabase.app';
+        const VOTES_PATH = '/votes_2027_dop.json';
+        const NOMS_PATH = '/noms_2027_list.json'; 
+        
+        let allVotes = {};
+        let nomsList = [];
+
+        // 🔥 УНИВЕРСАЛЬНЫЙ КОНВЕРТЕР
+        function firebaseToArray(data) {
+            if (!data) return [];
+            if (Array.isArray(data)) return data;
+            return Object.keys(data).sort((a, b) => Number(a) - Number(b)).map(key => data[key]);
+        }
+
+        async function loadData() {
+            try {
+                const [vRes, nRes] = await Promise.all([
+                    fetch(FIREBASE_URL + VOTES_PATH),
+                    fetch(FIREBASE_URL + NOMS_PATH)
+                ]);
+
+                allVotes = vRes.ok ? await vRes.json() : {};
+                const rawData = nRes.ok ? await nRes.json() : null;
+                nomsList = firebaseToArray(rawData);
+
+                renderNoms();
+                renderVotes();
+                calcStats();
+            } catch (e) {
+                console.error("Ошибка загрузки данных:", e);
+                alert("Не удалось загрузить данные из Firebase.");
+            }
+        }
+
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // --- НОМИНАЦИИ ---
+        function renderNoms() {
+            const list = document.getElementById('nomsList');
+            document.getElementById('nomsCount').textContent = nomsList.length;
+            if (nomsList.length === 0) {
+                list.innerHTML = '<div class="list-item" style="justify-content:center; opacity:0.6;">Список пуст</div>';
+                return;
+            }
+            list.innerHTML = nomsList.map((n, i) => `
+                <div class="list-item"><span><strong>${i+1}.</strong> ${n}</span><button class="delete-btn" onclick="deleteNom(${i})">🗑️</button></div>
+            `).join('');
+        }
+
+        async function addNomination() {
+            const input = document.getElementById('newNomInput');
+            const val = input.value.trim();
+            if (!val || nomsList.some(n => n.toLowerCase() === val.toLowerCase())) return alert('Некорректное или существующее название');
+            
+            nomsList.push(val);
+            try {
+                await fetch(FIREBASE_URL + NOMS_PATH, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(nomsList) });
+                input.value = '';
+                await loadData();
+                alert('✅ Номинация добавлена!');
+            } catch (e) { alert('❌ Ошибка: ' + e.message); }
+        }
+
+        async function deleteNom(index) {
+            if(!confirm('Удалить номинацию?')) return;
+            nomsList.splice(index, 1);
+            await fetch(FIREBASE_URL + NOMS_PATH, { method: 'PUT', body: JSON.stringify(nomsList) });
+            await loadData();
+        }
+
+        // --- ГОЛОСА ---
+        function renderVotes(filter = '') {
+            const tbody = document.getElementById('votesBody');
+            const select = document.getElementById('editUserSelect');
+            tbody.innerHTML = '';
+            select.innerHTML = '<option value="">Выберите пользователя...</option>';
+            
+            let visibleCount = 0;
+            Object.keys(allVotes).forEach(key => {
+                if (filter && !key.toLowerCase().includes(filter.toLowerCase())) return;
+                
+                if (!allVotes[key]) return; 
+                
+                const votes = firebaseToArray(allVotes[key]);
+                visibleCount++;
+                
+                tbody.innerHTML += `<tr><td><strong>${key}</strong></td><td>${votes.join(', ')}</td><td><button class="delete-btn" onclick="deleteVote('${key}')">Удалить</button></td></tr>`;
+                
+                const opt = document.createElement('option');
+                opt.value = key; opt.textContent = key;
+                select.appendChild(opt);
+            });
+            
+            document.getElementById('votersCount').textContent = visibleCount;
+            if (visibleCount === 0) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; opacity:0.6;">Пока никто не проголосовал</td></tr>';
+        }
+
+        function filterVotes() { renderVotes(document.getElementById('searchUser').value); }
+
+        async function deleteVote(key) {
+            if(!confirm(`Удалить голос ${key}?`)) return;
+            delete allVotes[key];
+            await fetch(FIREBASE_URL + VOTES_PATH, { method: 'PUT', body: JSON.stringify(allVotes) });
+            loadData();
+        }
+
+        function loadUserForEdit() {
+            const key = document.getElementById('editUserSelect').value;
+            if (!key) return alert('Выберите пользователя!');
+            
+            if (!allVotes[key]) return alert(`⚠️ Пользователь ${key} зарегистрирован, но ещё не проголосовал.`);
+            
+            document.getElementById('editArea').style.display = 'block';
+            document.getElementById('editUserName').textContent = `Редактирование: ${key}`;
+            const container = document.getElementById('editCheckboxes');
+            container.innerHTML = '';
+            
+            const userVotes = firebaseToArray(allVotes[key]);
+            const allPossible = [...new Set([...nomsList, ...userVotes])].sort();
+            
+            allPossible.forEach(nom => {
+                const isChecked = userVotes.includes(nom);
+                container.innerHTML += `<label style="display:flex; align-items:center; margin:8px 0; cursor:pointer; padding: 8px; border-radius: 8px;"><input type="checkbox" value="${nom}" ${isChecked ? 'checked' : ''} style="width:auto; margin:0 10px 0 0; accent-color: var(--accent);"> ${nom}</label>`;
+            });
+        }
+
+        async function saveEditedVote() {
+            const key = document.getElementById('editUserSelect').value;
+            const checked = Array.from(document.querySelectorAll('#editCheckboxes input:checked')).map(cb => cb.value);
+            if (checked.length !== 6) return alert('Должно быть выбрано ровно 6 номинаций!');
+            
+            allVotes[key] = checked;
+            await fetch(FIREBASE_URL + VOTES_PATH, { method: 'PUT', body: JSON.stringify(allVotes) });
+            alert('✅ Сохранено!');
+            document.getElementById('editArea').style.display = 'none';
+            loadData();
+        }
+
+        // --- СТАТИСТИКА ---
+        function calcStats() {
+            const counts = {};
+            let totalVoters = 0;
+            Object.values(allVotes).forEach(votesRaw => {
+                totalVoters++;
+                firebaseToArray(votesRaw).forEach(v => counts[v] = (counts[v] || 0) + 1);
+            });
+            
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card"><div class="stat-num">${totalVoters}</div><div class="stat-label">👥 Всего проголосовавших</div></div>
+                <div class="stat-card"><div class="stat-num">${Object.keys(counts).length}</div><div class="stat-label">🏷️ Уникальных номинаций</div></div>
+                <div class="stat-card"><div class="stat-num">${nomsList.length}</div><div class="stat-label">📋 Официальных номинаций</div></div>
+            `;
+            
+            const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+            if (sorted.length === 0) {
+                document.getElementById('ratingList').innerHTML = '<div class="list-item" style="justify-content:center; opacity:0.6;">Нет голосов</div>';
+                return;
+            }
+            
+            document.getElementById('ratingList').innerHTML = sorted.map(([name, count], i) => {
+                const percent = totalVoters > 0 ? Math.round((count / totalVoters) * 100) : 0;
+                return `<div class="list-item"><div style="flex:1;"><div style="font-weight:bold; margin-bottom:4px;">#${i+1} ${name}</div><div style="height:4px; background:rgba(255,77,0,0.2); border-radius:2px; overflow:hidden;"><div style="height:100%; width:${percent}%; background:var(--accent); border-radius:2px; transition: width 0.5s;"></div></div></div><div style="text-align:right; min-width: 100px;"><div style="color:var(--accent); font-weight:bold; font-size:18px;">${count}</div><div style="font-size:12px; opacity:0.7;">голосов (${percent}%)</div></div></div>`;
+            }).join('');
+        }
+
+        // Инициализация
+        loadData();
+    </script>
 </body>
 </html>
