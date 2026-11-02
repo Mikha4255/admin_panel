@@ -25,6 +25,29 @@
         button.action { width: 100%; padding: 14px; background: var(--accent); border: none; color: var(--bg); font-weight: bold; border-radius: 10px; cursor: pointer; font-size: 16px; transition: opacity 0.2s; }
         button.action:hover { opacity: 0.9; }
         
+        /* Кнопка обновления */
+        .refresh-btn { 
+            background: var(--success); 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 14px;
+            transition: all 0.2s;
+            margin-bottom: 15px;
+        }
+        .refresh-btn:hover { 
+            transform: scale(1.05); 
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+        }
+        .refresh-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         .list-item { background: var(--card); padding: 16px 20px; margin-bottom: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent); transition: background 0.2s; }
         .list-item:hover { background: #2a1208; }
         .delete-btn { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background 0.2s; }
@@ -72,9 +95,10 @@
 
         <!-- Вкладка: Голоса -->
         <div id="votes" class="tab-content">
+            <button class="refresh-btn" onclick="refreshVotesData()">🔄 Обновить данные</button>
             <div class="form-group">
                 <h2>Управление голосами</h2>
-                <input type="text" id="searchUser" placeholder=" Поиск по ФИО или классу..." oninput="filterVotes()" autocomplete="off">
+                <input type="text" id="searchUser" placeholder="🔍 Поиск по ФИО или классу..." oninput="filterVotes()" autocomplete="off">
                 <div style="display:flex; gap:10px; margin-top:10px; flex-wrap: wrap;">
                     <select id="editUserSelect" style="flex:1; min-width: 200px;"><option value="">Выберите пользователя...</option></select>
                     <button class="action" style="width:auto; min-width: 150px;" onclick="loadUserForEdit()">✏️ Редактировать</button>
@@ -96,8 +120,9 @@
 
         <!-- Вкладка: Статистика -->
         <div id="stats" class="tab-content">
+            <button class="refresh-btn" onclick="refreshStatsData()">🔄 Обновить данные</button>
             <div class="stats-grid" id="statsGrid"></div>
-            <h2>Рейтинг номинаций</h2>
+            <h2>🏆 Рейтинг номинаций</h2>
             <div id="ratingList"></div>
         </div>
     </div>
@@ -137,11 +162,72 @@
             }
         }
 
+        // 🔥 ФУНКЦИИ ОБНОВЛЕНИЯ ДЛЯ КНОПОК
+        async function refreshVotesData() {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Загрузка...';
+            btn.disabled = true;
+            
+            try {
+                const vRes = await fetch(FIREBASE_URL + VOTES_PATH);
+                allVotes = vRes.ok ? await vRes.json() : {};
+                renderVotes();
+                btn.textContent = '✅ Обновлено!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 1500);
+            } catch (e) {
+                btn.textContent = '❌ Ошибка';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 1500);
+            }
+        }
+
+        async function refreshStatsData() {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Загрузка...';
+            btn.disabled = true;
+            
+            try {
+                const [vRes, nRes] = await Promise.all([
+                    fetch(FIREBASE_URL + VOTES_PATH),
+                    fetch(FIREBASE_URL + NOMS_PATH)
+                ]);
+                allVotes = vRes.ok ? await vRes.json() : {};
+                const rawData = nRes.ok ? await nRes.json() : null;
+                nomsList = firebaseToArray(rawData);
+                calcStats();
+                btn.textContent = '✅ Обновлено!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 1500);
+            } catch (e) {
+                btn.textContent = '❌ Ошибка';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 1500);
+            }
+        }
+
         function switchTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             event.target.classList.add('active');
+            
+            // 🔥 АВТООБНОВЛЕНИЕ ДАННЫХ ПРИ ПЕРЕКЛЮЧЕНИИ ВКЛАДОК
+            if (id === 'votes') {
+                refreshVotesData();
+            } else if (id === 'stats') {
+                refreshStatsData();
+            }
         }
 
         // --- НОМИНАЦИИ ---
