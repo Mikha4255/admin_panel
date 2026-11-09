@@ -25,124 +25,53 @@
         button.action { width: 100%; padding: 14px; background: var(--accent); border: none; color: var(--bg); font-weight: bold; border-radius: 10px; cursor: pointer; font-size: 16px; transition: opacity 0.2s; }
         button.action:hover { opacity: 0.9; }
         
-        .refresh-btn { 
-            background: var(--success); 
-            color: white; 
-            border: none; 
-            padding: 10px 20px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 14px;
-            transition: all 0.2s;
-            margin-bottom: 15px;
-        }
+        .refresh-btn { background: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s; margin-bottom: 15px; }
         .refresh-btn:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3); }
         .refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         
-        .add-vote-section {
-            background: rgba(46, 204, 113, 0.05);
-            border: 2px solid var(--success);
-            padding: 25px;
-            border-radius: 16px;
-            margin-bottom: 25px;
-        }
+        .add-vote-section { background: rgba(46, 204, 113, 0.05); border: 2px solid var(--success); padding: 25px; border-radius: 16px; margin-bottom: 25px; }
         .add-vote-section h2 { color: var(--success); margin-bottom: 15px; }
-        .checkboxes-container {
-            max-height: 350px;
-            overflow-y: auto;
-            padding: 15px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            margin: 15px 0;
-        }
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-            cursor: pointer;
-            padding: 12px;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
+        .checkboxes-container { max-height: 350px; overflow-y: auto; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; margin: 15px 0; }
+        .checkbox-label { display: flex; align-items: center; margin: 10px 0; cursor: pointer; padding: 12px; border-radius: 8px; transition: background 0.2s; }
         .checkbox-label:hover { background: rgba(255,77,0,0.1); }
-        .checkbox-label input[type="checkbox"] {
-            width: auto;
-            margin: 0 12px 0 0;
-            accent-color: var(--accent);
-            transform: scale(1.2);
-        }
-        .selected-count {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--accent);
-            margin: 15px 0;
-            padding: 10px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 8px;
-        }
+        .checkbox-label input[type="checkbox"] { width: auto; margin: 0 12px 0 0; accent-color: var(--accent); transform: scale(1.2); }
+        
+        .selected-count { text-align: center; font-size: 18px; font-weight: bold; color: var(--accent); margin: 15px 0; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; }
         .selected-count.valid { color: var(--success); background: rgba(46, 204, 113, 0.1); }
         .selected-count.invalid { color: var(--danger); background: rgba(132, 0, 0, 0.1); }
-        
-        .suggestions-section {
-            background: rgba(52, 152, 219, 0.05);
-            border: 2px solid var(--info);
-            padding: 25px;
-            border-radius: 16px;
-            margin-bottom: 25px;
-        }
-        .suggestions-section h2 { color: var(--info); margin-bottom: 15px; }
-        .suggestion-item {
-            background: var(--card);
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 12px;
-            border-left: 4px solid var(--info);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        .suggestion-info { flex: 1; min-width: 200px; }
-        .suggestion-name {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--accent);
-            margin-bottom: 8px;
-        }
-        .suggestion-author {
+
+        /* 🔥 Стили для кастомных тегов номинаций */
+        .custom-noms-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 40px; }
+        .custom-nom-tag {
+            background: var(--info);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 14px;
-            color: var(--text);
-            opacity: 0.8;
-        }
-        .suggestion-actions {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            animation: fadeIn 0.2s ease;
         }
-        .btn-approve {
-            background: var(--success);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+        .custom-nom-tag .remove-tag {
             cursor: pointer;
             font-weight: bold;
-            transition: all 0.2s;
+            font-size: 16px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
         }
+        .custom-nom-tag .remove-tag:hover { opacity: 1; }
+        
+        .suggestions-section { background: rgba(52, 152, 219, 0.05); border: 2px solid var(--info); padding: 25px; border-radius: 16px; margin-bottom: 25px; }
+        .suggestions-section h2 { color: var(--info); margin-bottom: 15px; }
+        .suggestion-item { background: var(--card); padding: 20px; margin-bottom: 15px; border-radius: 12px; border-left: 4px solid var(--info); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .suggestion-info { flex: 1; min-width: 200px; }
+        .suggestion-name { font-size: 20px; font-weight: bold; color: var(--accent); margin-bottom: 8px; }
+        .suggestion-author { font-size: 14px; color: var(--text); opacity: 0.8; }
+        .suggestion-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-approve { background: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
         .btn-approve:hover { transform: scale(1.05); }
-        .btn-reject {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
+        .btn-reject { background: var(--danger); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
         .btn-reject:hover { transform: scale(1.05); }
         
         .list-item { background: var(--card); padding: 16px 20px; margin-bottom: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent); transition: background 0.2s; }
@@ -160,24 +89,10 @@
         .stat-num { font-size: 36px; font-weight: bold; color: var(--accent); margin-bottom: 5px; }
         .stat-label { font-size: 14px; opacity: 0.8; }
         
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 16px;
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
+        .notification { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 12px; font-weight: bold; font-size: 16px; z-index: 1000; animation: slideIn 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .notification.success { background: var(--success); color: white; }
         .notification.error { background: var(--danger); color: white; }
-        @keyframes slideIn {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         
         @media (max-width: 600px) {
             .tabs { flex-direction: column; }
@@ -213,12 +128,9 @@
         <!-- Вкладка: Предложения -->
         <div id="suggestions" class="tab-content">
             <button class="refresh-btn" onclick="refreshSuggestions()">🔄 Обновить предложения</button>
-            
             <div class="suggestions-section">
                 <h2>💡 Предложенные номинации от пользователей</h2>
-                <p style="color: var(--text); opacity: 0.8; margin-bottom: 15px;">
-                    Здесь отображаются номинации, которые предложили пользователи. Ты можешь одобрить их (добавить в основной список) или отклонить.
-                </p>
+                <p style="color: var(--text); opacity: 0.8; margin-bottom: 15px;">Здесь отображаются номинации, которые предложили пользователи. Ты можешь одобрить их или отклонить.</p>
                 <div id="suggestionsList"></div>
             </div>
         </div>
@@ -229,11 +141,16 @@
             
             <div class="add-vote-section">
                 <h2>➕ Добавить голос за пользователя</h2>
-                <p style="color: var(--text); opacity: 0.8; margin-bottom: 15px;">
-                    Используйте, если пользователь не смог проголосовать сам.
-                </p>
+                <p style="color: var(--text); opacity: 0.8; margin-bottom: 15px;">Используйте, если пользователь не смог проголосовать сам или хочет добавить свой уникальный вариант.</p>
                 
                 <input type="text" id="addVoteUser" placeholder="Формат: Иванов Иван|11В" autocomplete="off">
+                
+                <!-- 🔥 НОВОЕ ПОЛЕ ДЛЯ КАСТОМНОЙ НОМИНАЦИИ -->
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="customNomInput" placeholder="💡 Ввести свой вариант номинации..." style="flex: 1; margin: 0;" autocomplete="off">
+                    <button class="action" style="width: auto; background: var(--info);" onclick="addCustomNomToVote()">➕ Добавить вариант</button>
+                </div>
+                <div id="customNomsTags" class="custom-noms-container"></div>
                 
                 <div class="checkboxes-container" id="addVoteCheckboxes">
                     <p style="text-align: center; opacity: 0.6;">Загрузка номинаций...</p>
@@ -241,9 +158,7 @@
                 
                 <div class="selected-count" id="selectedCount">Выбрано: 0/6</div>
                 
-                <button class="action" style="background: var(--success);" onclick="addVoteForUser()">
-                    ✅ Добавить голос
-                </button>
+                <button class="action" style="background: var(--success);" onclick="addVoteForUser()">✅ Добавить голос</button>
             </div>
             
             <div class="form-group">
@@ -286,6 +201,7 @@
         let allVotes = {};
         let nomsList = [];
         let allSuggestions = {};
+        let customNomsForVote = []; // 🔥 Массив для хранения кастомных номинаций в текущей сессии
 
         function firebaseToArray(data) {
             if (!data) return [];
@@ -333,7 +249,6 @@
             const originalText = btn.textContent;
             btn.textContent = '⏳ Загрузка...';
             btn.disabled = true;
-            
             try {
                 const vRes = await fetch(FIREBASE_URL + VOTES_PATH);
                 allVotes = vRes.ok ? await vRes.json() : {};
@@ -351,15 +266,10 @@
             const originalText = btn.textContent;
             btn.textContent = '⏳ Загрузка...';
             btn.disabled = true;
-            
             try {
-                const [vRes, nRes] = await Promise.all([
-                    fetch(FIREBASE_URL + VOTES_PATH),
-                    fetch(FIREBASE_URL + NOMS_PATH)
-                ]);
+                const [vRes, nRes] = await Promise.all([fetch(FIREBASE_URL + VOTES_PATH), fetch(FIREBASE_URL + NOMS_PATH)]);
                 allVotes = vRes.ok ? await vRes.json() : {};
-                const rawData = nRes.ok ? await nRes.json() : null;
-                nomsList = firebaseToArray(rawData);
+                nomsList = firebaseToArray(nRes.ok ? await nRes.json() : null);
                 calcStats();
                 btn.textContent = '✅ Обновлено!';
                 setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 1500);
@@ -374,10 +284,8 @@
             const originalText = btn.textContent;
             btn.textContent = '⏳ Загрузка...';
             btn.disabled = true;
-            
             try {
-                const sRes = await fetch(FIREBASE_URL + SUGGESTIONS_PATH);
-                allSuggestions = sRes.ok ? await sRes.json() : {};
+                allSuggestions = (await fetch(FIREBASE_URL + SUGGESTIONS_PATH)).ok ? await (await fetch(FIREBASE_URL + SUGGESTIONS_PATH)).json() : {};
                 renderSuggestions();
                 btn.textContent = '✅ Обновлено!';
                 setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 1500);
@@ -392,7 +300,6 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             event.target.classList.add('active');
-            
             if (id === 'votes') refreshVotesData();
             else if (id === 'stats') refreshStatsData();
             else if (id === 'suggestions') refreshSuggestions();
@@ -406,16 +313,13 @@
                 list.innerHTML = '<div class="list-item" style="justify-content:center; opacity:0.6;">Список пуст</div>';
                 return;
             }
-            list.innerHTML = nomsList.map((n, i) => `
-                <div class="list-item"><span><strong>${i+1}.</strong> ${n}</span><button class="delete-btn" onclick="deleteNom(${i})">🗑️</button></div>
-            `).join('');
+            list.innerHTML = nomsList.map((n, i) => `<div class="list-item"><span><strong>${i+1}.</strong> ${n}</span><button class="delete-btn" onclick="deleteNom(${i})">🗑️</button></div>`).join('');
         }
 
         async function addNomination() {
             const input = document.getElementById('newNomInput');
             const val = input.value.trim();
             if (!val || nomsList.some(n => n.toLowerCase() === val.toLowerCase())) return alert('Некорректное или существующее название');
-            
             nomsList.push(val);
             try {
                 await fetch(FIREBASE_URL + NOMS_PATH, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(nomsList) });
@@ -435,22 +339,16 @@
         // --- ПРЕДЛОЖЕНИЯ ---
         function renderSuggestions() {
             const container = document.getElementById('suggestionsList');
-            
             const allSuggs = [];
             for (const userKey in allSuggestions) {
-                const userSuggs = allSuggestions[userKey];
-                if (Array.isArray(userSuggs)) {
-                    userSuggs.forEach(sugg => {
-                        allSuggs.push({ name: sugg, author: userKey });
-                    });
+                if (Array.isArray(allSuggestions[userKey])) {
+                    allSuggestions[userKey].forEach(sugg => allSuggs.push({ name: sugg, author: userKey }));
                 }
             }
-            
             if (allSuggs.length === 0) {
-                container.innerHTML = '<div class="list-item" style="justify-content:center; opacity:0.6;">Пока нет предложений от пользователей</div>';
+                container.innerHTML = '<div class="list-item" style="justify-content:center; opacity:0.6;">Пока нет предложений</div>';
                 return;
             }
-            
             container.innerHTML = allSuggs.map(sugg => {
                 const isAlreadyInList = nomsList.some(n => n.toLowerCase() === sugg.name.toLowerCase());
                 return `
@@ -458,173 +356,147 @@
                         <div class="suggestion-info">
                             <div class="suggestion-name">${sugg.name}</div>
                             <div class="suggestion-author">👤 Предложил: ${sugg.author}</div>
-                            ${isAlreadyInList ? '<div style="color: var(--success); margin-top: 5px;">✅ Уже в списке номинаций</div>' : ''}
+                            ${isAlreadyInList ? '<div style="color: var(--success); margin-top: 5px;">✅ Уже в списке</div>' : ''}
                         </div>
                         <div class="suggestion-actions">
                             ${!isAlreadyInList ? `<button class="btn-approve" onclick="approveSuggestion('${sugg.name.replace(/'/g, "\\'")}', '${sugg.author.replace(/'/g, "\\'")}')">✅ Одобрить</button>` : ''}
                             <button class="btn-reject" onclick="rejectSuggestion('${sugg.name.replace(/'/g, "\\'")}', '${sugg.author.replace(/'/g, "\\'")}')">❌ Отклонить</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }).join('');
         }
 
         async function approveSuggestion(suggName, author) {
-            if (!confirm(`Добавить номинацию "${suggName}" в основной список?`)) return;
-            
-            if (nomsList.some(n => n.toLowerCase() === suggName.toLowerCase())) {
-                showNotification('⚠️ Такая номинация уже есть в списке!', 'error');
-                return;
-            }
-            
+            if (!confirm(`Добавить "${suggName}" в основной список?`)) return;
+            if (nomsList.some(n => n.toLowerCase() === suggName.toLowerCase())) return showNotification('⚠️ Уже есть в списке!', 'error');
             try {
                 nomsList.push(suggName);
-                await fetch(FIREBASE_URL + NOMS_PATH, { 
-                    method: 'PUT', 
-                    headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify(nomsList) 
-                });
-                
+                await fetch(FIREBASE_URL + NOMS_PATH, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(nomsList) });
                 if (allSuggestions[author]) {
                     allSuggestions[author] = allSuggestions[author].filter(s => s !== suggName);
-                    if (allSuggestions[author].length === 0) {
-                        delete allSuggestions[author];
-                    }
-                    await fetch(FIREBASE_URL + SUGGESTIONS_PATH, { 
-                        method: 'PUT', 
-                        headers: {'Content-Type': 'application/json'}, 
-                        body: JSON.stringify(allSuggestions) 
-                    });
+                    if (allSuggestions[author].length === 0) delete allSuggestions[author];
+                    await fetch(FIREBASE_URL + SUGGESTIONS_PATH, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(allSuggestions) });
                 }
-                
-                showNotification(`✅ Номинация "${suggName}" добавлена в основной список!`, 'success');
+                showNotification(`✅ "${suggName}" добавлена!`, 'success');
                 await loadData();
-            } catch (e) {
-                showNotification('❌ Ошибка: ' + e.message, 'error');
-            }
+            } catch (e) { showNotification('❌ Ошибка: ' + e.message, 'error'); }
         }
 
         async function rejectSuggestion(suggName, author) {
-            if (!confirm(`Отклонить номинацию "${suggName}"?`)) return;
-            
+            if (!confirm(`Отклонить "${suggName}"?`)) return;
             try {
                 if (allSuggestions[author]) {
                     allSuggestions[author] = allSuggestions[author].filter(s => s !== suggName);
-                    if (allSuggestions[author].length === 0) {
-                        delete allSuggestions[author];
-                    }
-                    await fetch(FIREBASE_URL + SUGGESTIONS_PATH, { 
-                        method: 'PUT', 
-                        headers: {'Content-Type': 'application/json'}, 
-                        body: JSON.stringify(allSuggestions) 
-                    });
+                    if (allSuggestions[author].length === 0) delete allSuggestions[author];
+                    await fetch(FIREBASE_URL + SUGGESTIONS_PATH, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(allSuggestions) });
                 }
-                
-                showNotification(`❌ Номинация "${suggName}" отклонена`, 'error');
+                showNotification(`❌ "${suggName}" отклонена`, 'error');
                 await loadData();
-            } catch (e) {
-                showNotification('❌ Ошибка: ' + e.message, 'error');
-            }
+            } catch (e) { showNotification('❌ Ошибка: ' + e.message, 'error'); }
         }
 
-        // 🔥 ДОБАВЛЕНИЕ ГОЛОСА (с официальными + предложенными номинациями)
+        // 🔥 ДОБАВЛЕНИЕ ГОЛОСА (с кастомными номинациями)
         function renderAddVoteCheckboxes() {
             const container = document.getElementById('addVoteCheckboxes');
-            
-            // Собираем все уникальные номинации: официальные + предложенные
             const allNoms = new Set(nomsList);
-            
-            // Добавляем все предложения от всех пользователей
             for (const userKey in allSuggestions) {
-                const userSuggs = allSuggestions[userKey];
-                if (Array.isArray(userSuggs)) {
-                    userSuggs.forEach(s => allNoms.add(s));
-                }
+                if (Array.isArray(allSuggestions[userKey])) allSuggestions[userKey].forEach(s => allNoms.add(s));
             }
-            
             const allNomsArray = [...allNoms].sort();
             
             if (allNomsArray.length === 0) {
                 container.innerHTML = '<p style="text-align: center; opacity: 0.6;">Нет доступных номинаций</p>';
                 return;
             }
-            
             container.innerHTML = allNomsArray.map(nom => {
                 const isOfficial = nomsList.some(n => n.toLowerCase() === nom.toLowerCase());
-                const icon = isOfficial ? '📋' : '💡';
-                const label = isOfficial ? '' : ' <span style="opacity:0.7; font-size:13px;">(предложение)</span>';
-                
-                return `
-                    <label class="checkbox-label">
-                        <input type="checkbox" value="${nom.replace(/"/g, '&quot;')}" onchange="updateAddVoteCount()">
-                        ${icon} ${nom}${label}
-                    </label>
-                `;
+                return `<label class="checkbox-label"><input type="checkbox" value="${nom.replace(/"/g, '&quot;')}" onchange="updateAddVoteCount()"> ${isOfficial ? '📋' : '💡'} ${nom} ${!isOfficial ? '<span style="opacity:0.7; font-size:13px;">(предл.)</span>' : ''}</label>`;
             }).join('');
+        }
+
+        // 🔥 Функция добавления кастомной номинации
+        function addCustomNomToVote() {
+            const input = document.getElementById('customNomInput');
+            const val = input.value.trim();
+            if (!val) return showNotification('Введите название номинации', 'error');
+            
+            const checkboxes = document.querySelectorAll('#addVoteCheckboxes input[type="checkbox"]:checked');
+            const selectedFromCheckboxes = Array.from(checkboxes).map(cb => cb.value);
+            const allCurrentlySelected = [...selectedFromCheckboxes, ...customNomsForVote];
+            
+            if (allCurrentlySelected.some(n => n.toLowerCase() === val.toLowerCase())) {
+                return showNotification('Эта номинация уже выбрана!', 'error');
+            }
+            if (allCurrentlySelected.length >= 6) {
+                return showNotification('Максимум 6 номинаций!', 'error');
+            }
+            
+            customNomsForVote.push(val);
+            input.value = '';
+            renderCustomNomsTags();
+            updateAddVoteCount();
+        }
+
+        function removeCustomNom(index) {
+            customNomsForVote.splice(index, 1);
+            renderCustomNomsTags();
+            updateAddVoteCount();
+        }
+
+        function renderCustomNomsTags() {
+            const container = document.getElementById('customNomsTags');
+            container.innerHTML = customNomsForVote.map((nom, index) => `
+                <span class="custom-nom-tag">
+                    💡 ${nom}
+                    <span class="remove-tag" onclick="removeCustomNom(${index})">✕</span>
+                </span>
+            `).join('');
         }
 
         function updateAddVoteCount() {
             const checkboxes = document.querySelectorAll('#addVoteCheckboxes input[type="checkbox"]:checked');
-            const count = checkboxes.length;
+            const count = checkboxes.length + customNomsForVote.length;
             const countEl = document.getElementById('selectedCount');
             countEl.textContent = `Выбрано: ${count}/6`;
-            
-            if (count === 6) countEl.className = 'selected-count valid';
-            else countEl.className = 'selected-count invalid';
+            countEl.className = count === 6 ? 'selected-count valid' : 'selected-count invalid';
         }
 
         async function addVoteForUser() {
             const userInput = document.getElementById('addVoteUser').value.trim();
             const checkboxes = document.querySelectorAll('#addVoteCheckboxes input[type="checkbox"]:checked');
-            const selectedNoms = Array.from(checkboxes).map(cb => cb.value);
+            const selectedFromCheckboxes = Array.from(checkboxes).map(cb => cb.value);
             
-            if (!userInput) {
-                showNotification('❌ Введите ФИО и класс пользователя!', 'error');
-                return;
-            }
+            // 🔥 Объединяем галочки и кастомные варианты
+            const selectedNoms = [...selectedFromCheckboxes, ...customNomsForVote];
             
-            if (!userInput.includes('|')) {
-                showNotification('❌ Неверный формат! Используйте: Иванов Иван|11В', 'error');
-                return;
-            }
-            
-            if (selectedNoms.length !== 6) {
-                showNotification(`❌ Должно быть выбрано ровно 6 номинаций! Сейчас: ${selectedNoms.length}`, 'error');
-                return;
-            }
+            if (!userInput) return showNotification('❌ Введите ФИО и класс!', 'error');
+            if (!userInput.includes('|')) return showNotification('❌ Неверный формат! Используйте: Иванов Иван|11В', 'error');
+            if (selectedNoms.length !== 6) return showNotification(`❌ Должно быть ровно 6 номинаций! Сейчас: ${selectedNoms.length}`, 'error');
             
             if (allVotes[userInput]) {
                 const existingVotes = firebaseToArray(allVotes[userInput]);
-                const confirmOverwrite = confirm(
-                    `⚠️ Пользователь "${userInput}" уже проголосовал!\n\n` +
-                    `Текущий выбор: ${existingVotes.join(', ')}\n\n` +
-                    `Новый выбор: ${selectedNoms.join(', ')}\n\n` +
-                    `Заменить голос?`
-                );
-                if (!confirmOverwrite) return;
+                if (!confirm(`⚠️ Пользователь "${userInput}" уже проголосовал!\n\nТекущий: ${existingVotes.join(', ')}\nНовый: ${selectedNoms.join(', ')}\n\nЗаменить?`)) return;
             }
             
             try {
                 allVotes[userInput] = selectedNoms;
-                await fetch(FIREBASE_URL + VOTES_PATH, { 
-                    method: 'PUT', 
-                    headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify(allVotes) 
-                });
+                await fetch(FIREBASE_URL + VOTES_PATH, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(allVotes) });
                 
-                showNotification(`✅ Голос для "${userInput}" успешно добавлен!`, 'success');
+                showNotification(`✅ Голос для "${userInput}" добавлен!`, 'success');
                 
+                // Очистка формы
                 document.getElementById('addVoteUser').value = '';
                 checkboxes.forEach(cb => cb.checked = false);
+                customNomsForVote = [];
+                renderCustomNomsTags();
                 updateAddVoteCount();
-                
                 renderVotes();
             } catch (e) {
-                showNotification('❌ Ошибка при сохранении: ' + e.message, 'error');
+                showNotification('❌ Ошибка: ' + e.message, 'error');
             }
         }
 
-        // --- ГОЛОСА ---
+        // --- УПРАВЛЕНИЕ ГОЛОСАМИ ---
         function renderVotes(filter = '') {
             const tbody = document.getElementById('votesBody');
             const select = document.getElementById('editUserSelect');
@@ -634,12 +506,10 @@
             let visibleCount = 0;
             Object.keys(allVotes).forEach(key => {
                 if (filter && !key.toLowerCase().includes(filter.toLowerCase())) return;
-                
                 if (!allVotes[key]) return; 
                 
                 const votes = firebaseToArray(allVotes[key]);
                 visibleCount++;
-                
                 tbody.innerHTML += `<tr><td><strong>${key}</strong></td><td>${votes.join(', ')}</td><td><button class="delete-btn" onclick="deleteVote('${key}')">Удалить</button></td></tr>`;
                 
                 const opt = document.createElement('option');
@@ -663,8 +533,7 @@
         function loadUserForEdit() {
             const key = document.getElementById('editUserSelect').value;
             if (!key) return alert('Выберите пользователя!');
-            
-            if (!allVotes[key]) return alert(`⚠️ Пользователь ${key} зарегистрирован, но ещё не проголосовал.`);
+            if (!allVotes[key]) return alert(`⚠️ Пользователь ${key} ещё не проголосовал.`);
             
             document.getElementById('editArea').style.display = 'block';
             document.getElementById('editUserName').textContent = `Редактирование: ${key}`;
@@ -687,7 +556,7 @@
             
             allVotes[key] = checked;
             await fetch(FIREBASE_URL + VOTES_PATH, { method: 'PUT', body: JSON.stringify(allVotes) });
-            showNotification('✅ Голос успешно обновлён!', 'success');
+            showNotification('✅ Голос обновлён!', 'success');
             document.getElementById('editArea').style.display = 'none';
             loadData();
         }
@@ -719,7 +588,6 @@
             }).join('');
         }
 
-        // Инициализация
         loadData();
     </script>
 </body>
