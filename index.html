@@ -85,7 +85,6 @@
         .selected-count.valid { color: var(--success); background: rgba(46, 204, 113, 0.1); }
         .selected-count.invalid { color: var(--danger); background: rgba(132, 0, 0, 0.1); }
         
-        /* Стили для предложений */
         .suggestions-section {
             background: rgba(52, 152, 219, 0.05);
             border: 2px solid var(--info);
@@ -211,7 +210,7 @@
             <div id="nomsList"></div>
         </div>
 
-        <!-- 🔥 НОВАЯ ВКЛАДКА: Предложения -->
+        <!-- Вкладка: Предложения -->
         <div id="suggestions" class="tab-content">
             <button class="refresh-btn" onclick="refreshSuggestions()">🔄 Обновить предложения</button>
             
@@ -370,7 +369,6 @@
             }
         }
 
-        // 🔥 ОБНОВЛЕНИЕ ПРЕДЛОЖЕНИЙ
         async function refreshSuggestions() {
             const btn = event.target;
             const originalText = btn.textContent;
@@ -434,11 +432,10 @@
             await loadData();
         }
 
-        // 🔥 --- ПРЕДЛОЖЕНИЯ ---
+        // --- ПРЕДЛОЖЕНИЯ ---
         function renderSuggestions() {
             const container = document.getElementById('suggestionsList');
             
-            // Собираем все предложения от всех пользователей
             const allSuggs = [];
             for (const userKey in allSuggestions) {
                 const userSuggs = allSuggestions[userKey];
@@ -475,14 +472,12 @@
         async function approveSuggestion(suggName, author) {
             if (!confirm(`Добавить номинацию "${suggName}" в основной список?`)) return;
             
-            // Проверяем, нет ли уже такой номинации
             if (nomsList.some(n => n.toLowerCase() === suggName.toLowerCase())) {
                 showNotification('⚠️ Такая номинация уже есть в списке!', 'error');
                 return;
             }
             
             try {
-                // Добавляем в основной список
                 nomsList.push(suggName);
                 await fetch(FIREBASE_URL + NOMS_PATH, { 
                     method: 'PUT', 
@@ -490,7 +485,6 @@
                     body: JSON.stringify(nomsList) 
                 });
                 
-                // Удаляем из предложений этого пользователя
                 if (allSuggestions[author]) {
                     allSuggestions[author] = allSuggestions[author].filter(s => s !== suggName);
                     if (allSuggestions[author].length === 0) {
@@ -514,7 +508,6 @@
             if (!confirm(`Отклонить номинацию "${suggName}"?`)) return;
             
             try {
-                // Удаляем из предложений этого пользователя
                 if (allSuggestions[author]) {
                     allSuggestions[author] = allSuggestions[author].filter(s => s !== suggName);
                     if (allSuggestions[author].length === 0) {
@@ -534,39 +527,41 @@
             }
         }
 
-        // --- ДОБАВЛЕНИЕ ГОЛОСА ---
+        // 🔥 ДОБАВЛЕНИЕ ГОЛОСА (с официальными + предложенными номинациями)
         function renderAddVoteCheckboxes() {
-    const container = document.getElementById('addVoteCheckboxes');
-    
-    const allNoms = new Set(nomsList);
-    
-    for (const userKey in allSuggestions) {
-        const userSuggs = allSuggestions[userKey];
-        if (Array.isArray(userSuggs)) {
-            userSuggs.forEach(s => allNoms.add(s));
+            const container = document.getElementById('addVoteCheckboxes');
+            
+            // Собираем все уникальные номинации: официальные + предложенные
+            const allNoms = new Set(nomsList);
+            
+            // Добавляем все предложения от всех пользователей
+            for (const userKey in allSuggestions) {
+                const userSuggs = allSuggestions[userKey];
+                if (Array.isArray(userSuggs)) {
+                    userSuggs.forEach(s => allNoms.add(s));
+                }
+            }
+            
+            const allNomsArray = [...allNoms].sort();
+            
+            if (allNomsArray.length === 0) {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.6;">Нет доступных номинаций</p>';
+                return;
+            }
+            
+            container.innerHTML = allNomsArray.map(nom => {
+                const isOfficial = nomsList.some(n => n.toLowerCase() === nom.toLowerCase());
+                const icon = isOfficial ? '📋' : '💡';
+                const label = isOfficial ? '' : ' <span style="opacity:0.7; font-size:13px;">(предложение)</span>';
+                
+                return `
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="${nom.replace(/"/g, '&quot;')}" onchange="updateAddVoteCount()">
+                        ${icon} ${nom}${label}
+                    </label>
+                `;
+            }).join('');
         }
-    }
-    
-    const allNomsArray = [...allNoms].sort();
-    
-    if (allNomsArray.length === 0) {
-        container.innerHTML = '<p style="text-align: center; opacity: 0.6;">Нет доступных номинаций</p>';
-        return;
-    }
-    
-    container.innerHTML = allNomsArray.map(nom => {
-        const isOfficial = nomsList.some(n => n.toLowerCase() === nom.toLowerCase());
-        const icon = isOfficial ? '📋' : '💡';
-        const label = isOfficial ? '' : ' <span style="opacity:0.7; font-size:13px;">(предложение)</span>';
-        
-        return `
-            <label class="checkbox-label">
-                <input type="checkbox" value="${nom.replace(/"/g, '&quot;')}" onchange="updateAddVoteCount()">
-                ${icon} ${nom}${label}
-            </label>
-        `;
-    }).join('');
-}
 
         function updateAddVoteCount() {
             const checkboxes = document.querySelectorAll('#addVoteCheckboxes input[type="checkbox"]:checked');
