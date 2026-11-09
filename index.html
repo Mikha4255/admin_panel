@@ -25,7 +25,6 @@
         button.action { width: 100%; padding: 14px; background: var(--accent); border: none; color: var(--bg); font-weight: bold; border-radius: 10px; cursor: pointer; font-size: 16px; transition: opacity 0.2s; }
         button.action:hover { opacity: 0.9; }
         
-        /* Кнопка обновления */
         .refresh-btn { 
             background: var(--success); 
             color: white; 
@@ -38,17 +37,9 @@
             transition: all 0.2s;
             margin-bottom: 15px;
         }
-        .refresh-btn:hover { 
-            transform: scale(1.05); 
-            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
-        }
-        .refresh-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .refresh-btn:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3); }
+        .refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         
-        /* Форма добавления голоса */
         .add-vote-section {
             background: rgba(46, 204, 113, 0.05);
             border: 2px solid var(--success);
@@ -56,10 +47,7 @@
             border-radius: 16px;
             margin-bottom: 25px;
         }
-        .add-vote-section h2 {
-            color: var(--success);
-            margin-bottom: 15px;
-        }
+        .add-vote-section h2 { color: var(--success); margin-bottom: 15px; }
         .checkboxes-container {
             max-height: 350px;
             overflow-y: auto;
@@ -77,9 +65,7 @@
             border-radius: 8px;
             transition: background 0.2s;
         }
-        .checkbox-label:hover {
-            background: rgba(255,77,0,0.1);
-        }
+        .checkbox-label:hover { background: rgba(255,77,0,0.1); }
         .checkbox-label input[type="checkbox"] {
             width: auto;
             margin: 0 12px 0 0;
@@ -96,14 +82,69 @@
             background: rgba(0,0,0,0.3);
             border-radius: 8px;
         }
-        .selected-count.valid {
-            color: var(--success);
-            background: rgba(46, 204, 113, 0.1);
+        .selected-count.valid { color: var(--success); background: rgba(46, 204, 113, 0.1); }
+        .selected-count.invalid { color: var(--danger); background: rgba(132, 0, 0, 0.1); }
+        
+        /* Стили для предложений */
+        .suggestions-section {
+            background: rgba(52, 152, 219, 0.05);
+            border: 2px solid var(--info);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 25px;
         }
-        .selected-count.invalid {
-            color: var(--danger);
-            background: rgba(132, 0, 0, 0.1);
+        .suggestions-section h2 { color: var(--info); margin-bottom: 15px; }
+        .suggestion-item {
+            background: var(--card);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            border-left: 4px solid var(--info);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
+        .suggestion-info { flex: 1; min-width: 200px; }
+        .suggestion-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        .suggestion-author {
+            font-size: 14px;
+            color: var(--text);
+            opacity: 0.8;
+        }
+        .suggestion-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-approve {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-approve:hover { transform: scale(1.05); }
+        .btn-reject {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-reject:hover { transform: scale(1.05); }
         
         .list-item { background: var(--card); padding: 16px 20px; margin-bottom: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent); transition: background 0.2s; }
         .list-item:hover { background: #2a1208; }
@@ -144,8 +185,8 @@
             .tab-btn { width: 100%; text-align: center; }
             table { font-size: 14px; }
             th, td { padding: 10px 8px; }
-            .list-item { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .delete-btn { width: 100%; }
+            .list-item, .suggestion-item { flex-direction: column; align-items: flex-start; }
+            .delete-btn, .suggestion-actions { width: 100%; }
         }
     </style>
 </head>
@@ -154,6 +195,7 @@
         <h1>🛠 Админ-панель SABL 2027</h1>
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('noms')">📋 Номинации</button>
+            <button class="tab-btn" onclick="switchTab('suggestions')">💡 Предложения</button>
             <button class="tab-btn" onclick="switchTab('votes')">🗳️ Голоса</button>
             <button class="tab-btn" onclick="switchTab('stats')">📊 Статистика</button>
         </div>
@@ -169,11 +211,23 @@
             <div id="nomsList"></div>
         </div>
 
+        <!-- 🔥 НОВАЯ ВКЛАДКА: Предложения -->
+        <div id="suggestions" class="tab-content">
+            <button class="refresh-btn" onclick="refreshSuggestions()">🔄 Обновить предложения</button>
+            
+            <div class="suggestions-section">
+                <h2>💡 Предложенные номинации от пользователей</h2>
+                <p style="color: var(--text); opacity: 0.8; margin-bottom: 15px;">
+                    Здесь отображаются номинации, которые предложили пользователи. Ты можешь одобрить их (добавить в основной список) или отклонить.
+                </p>
+                <div id="suggestionsList"></div>
+            </div>
+        </div>
+
         <!-- Вкладка: Голоса -->
         <div id="votes" class="tab-content">
             <button class="refresh-btn" onclick="refreshVotesData()">🔄 Обновить данные</button>
             
-            <!-- 🔥 НОВАЯ СЕКЦИЯ: ДОБАВИТЬ ГОЛОС ЗА ПОЛЬЗОВАТЕЛЯ -->
             <div class="add-vote-section">
                 <h2>➕ Добавить голос за пользователя</h2>
                 <p style="color: var(--text); opacity: 0.8; margin-bottom: 15px;">
@@ -227,19 +281,19 @@
     <script>
         const FIREBASE_URL = 'https://vote-1535-sabl-default-rtdb.europe-west1.firebasedatabase.app';
         const VOTES_PATH = '/votes_2027_dop.json';
-        const NOMS_PATH = '/noms_2027_list.json'; 
+        const NOMS_PATH = '/noms_2027_list.json';
+        const SUGGESTIONS_PATH = '/suggestions_2027_dop.json';
         
         let allVotes = {};
         let nomsList = [];
+        let allSuggestions = {};
 
-        // 🔥 УНИВЕРСАЛЬНЫЙ КОНВЕРТЕР
         function firebaseToArray(data) {
             if (!data) return [];
             if (Array.isArray(data)) return data;
             return Object.keys(data).sort((a, b) => Number(a) - Number(b)).map(key => data[key]);
         }
 
-        // 🔥 УВЕДОМЛЕНИЯ
         function showNotification(message, type = 'success') {
             const notif = document.createElement('div');
             notif.className = `notification ${type}`;
@@ -253,26 +307,28 @@
 
         async function loadData() {
             try {
-                const [vRes, nRes] = await Promise.all([
+                const [vRes, nRes, sRes] = await Promise.all([
                     fetch(FIREBASE_URL + VOTES_PATH),
-                    fetch(FIREBASE_URL + NOMS_PATH)
+                    fetch(FIREBASE_URL + NOMS_PATH),
+                    fetch(FIREBASE_URL + SUGGESTIONS_PATH)
                 ]);
 
                 allVotes = vRes.ok ? await vRes.json() : {};
                 const rawData = nRes.ok ? await nRes.json() : null;
                 nomsList = firebaseToArray(rawData);
+                allSuggestions = sRes.ok ? await sRes.json() : {};
 
                 renderNoms();
                 renderVotes();
                 calcStats();
-                renderAddVoteCheckboxes(); // 🔥 Обновляем чекбоксы для добавления голоса
+                renderSuggestions();
+                renderAddVoteCheckboxes();
             } catch (e) {
                 console.error("Ошибка загрузки данных:", e);
                 alert("Не удалось загрузить данные из Firebase.");
             }
         }
 
-        // 🔥 ФУНКЦИИ ОБНОВЛЕНИЯ ДЛЯ КНОПОК
         async function refreshVotesData() {
             const btn = event.target;
             const originalText = btn.textContent;
@@ -284,16 +340,10 @@
                 allVotes = vRes.ok ? await vRes.json() : {};
                 renderVotes();
                 btn.textContent = '✅ Обновлено!';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }, 1500);
+                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 1500);
             } catch (e) {
                 btn.textContent = '❌ Ошибка';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }, 1500);
+                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 1500);
             }
         }
 
@@ -313,16 +363,29 @@
                 nomsList = firebaseToArray(rawData);
                 calcStats();
                 btn.textContent = '✅ Обновлено!';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }, 1500);
+                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 1500);
             } catch (e) {
                 btn.textContent = '❌ Ошибка';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }, 1500);
+                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 1500);
+            }
+        }
+
+        // 🔥 ОБНОВЛЕНИЕ ПРЕДЛОЖЕНИЙ
+        async function refreshSuggestions() {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Загрузка...';
+            btn.disabled = true;
+            
+            try {
+                const sRes = await fetch(FIREBASE_URL + SUGGESTIONS_PATH);
+                allSuggestions = sRes.ok ? await sRes.json() : {};
+                renderSuggestions();
+                btn.textContent = '✅ Обновлено!';
+                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 1500);
+            } catch (e) {
+                btn.textContent = '❌ Ошибка';
+                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 1500);
             }
         }
 
@@ -332,11 +395,9 @@
             document.getElementById(id).classList.add('active');
             event.target.classList.add('active');
             
-            if (id === 'votes') {
-                refreshVotesData();
-            } else if (id === 'stats') {
-                refreshStatsData();
-            }
+            if (id === 'votes') refreshVotesData();
+            else if (id === 'stats') refreshStatsData();
+            else if (id === 'suggestions') refreshSuggestions();
         }
 
         // --- НОМИНАЦИИ ---
@@ -362,7 +423,7 @@
                 await fetch(FIREBASE_URL + NOMS_PATH, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(nomsList) });
                 input.value = '';
                 await loadData();
-                alert('✅ Номинация добавлена!');
+                showNotification('✅ Номинация добавлена!', 'success');
             } catch (e) { alert('❌ Ошибка: ' + e.message); }
         }
 
@@ -373,7 +434,107 @@
             await loadData();
         }
 
-        // --- 🔥 ДОБАВЛЕНИЕ ГОЛОСА ЗА ПОЛЬЗОВАТЕЛЯ ---
+        // 🔥 --- ПРЕДЛОЖЕНИЯ ---
+        function renderSuggestions() {
+            const container = document.getElementById('suggestionsList');
+            
+            // Собираем все предложения от всех пользователей
+            const allSuggs = [];
+            for (const userKey in allSuggestions) {
+                const userSuggs = allSuggestions[userKey];
+                if (Array.isArray(userSuggs)) {
+                    userSuggs.forEach(sugg => {
+                        allSuggs.push({ name: sugg, author: userKey });
+                    });
+                }
+            }
+            
+            if (allSuggs.length === 0) {
+                container.innerHTML = '<div class="list-item" style="justify-content:center; opacity:0.6;">Пока нет предложений от пользователей</div>';
+                return;
+            }
+            
+            container.innerHTML = allSuggs.map(sugg => {
+                const isAlreadyInList = nomsList.some(n => n.toLowerCase() === sugg.name.toLowerCase());
+                return `
+                    <div class="suggestion-item">
+                        <div class="suggestion-info">
+                            <div class="suggestion-name">${sugg.name}</div>
+                            <div class="suggestion-author">👤 Предложил: ${sugg.author}</div>
+                            ${isAlreadyInList ? '<div style="color: var(--success); margin-top: 5px;">✅ Уже в списке номинаций</div>' : ''}
+                        </div>
+                        <div class="suggestion-actions">
+                            ${!isAlreadyInList ? `<button class="btn-approve" onclick="approveSuggestion('${sugg.name.replace(/'/g, "\\'")}', '${sugg.author.replace(/'/g, "\\'")}')">✅ Одобрить</button>` : ''}
+                            <button class="btn-reject" onclick="rejectSuggestion('${sugg.name.replace(/'/g, "\\'")}', '${sugg.author.replace(/'/g, "\\'")}')">❌ Отклонить</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function approveSuggestion(suggName, author) {
+            if (!confirm(`Добавить номинацию "${suggName}" в основной список?`)) return;
+            
+            // Проверяем, нет ли уже такой номинации
+            if (nomsList.some(n => n.toLowerCase() === suggName.toLowerCase())) {
+                showNotification('⚠️ Такая номинация уже есть в списке!', 'error');
+                return;
+            }
+            
+            try {
+                // Добавляем в основной список
+                nomsList.push(suggName);
+                await fetch(FIREBASE_URL + NOMS_PATH, { 
+                    method: 'PUT', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify(nomsList) 
+                });
+                
+                // Удаляем из предложений этого пользователя
+                if (allSuggestions[author]) {
+                    allSuggestions[author] = allSuggestions[author].filter(s => s !== suggName);
+                    if (allSuggestions[author].length === 0) {
+                        delete allSuggestions[author];
+                    }
+                    await fetch(FIREBASE_URL + SUGGESTIONS_PATH, { 
+                        method: 'PUT', 
+                        headers: {'Content-Type': 'application/json'}, 
+                        body: JSON.stringify(allSuggestions) 
+                    });
+                }
+                
+                showNotification(`✅ Номинация "${suggName}" добавлена в основной список!`, 'success');
+                await loadData();
+            } catch (e) {
+                showNotification('❌ Ошибка: ' + e.message, 'error');
+            }
+        }
+
+        async function rejectSuggestion(suggName, author) {
+            if (!confirm(`Отклонить номинацию "${suggName}"?`)) return;
+            
+            try {
+                // Удаляем из предложений этого пользователя
+                if (allSuggestions[author]) {
+                    allSuggestions[author] = allSuggestions[author].filter(s => s !== suggName);
+                    if (allSuggestions[author].length === 0) {
+                        delete allSuggestions[author];
+                    }
+                    await fetch(FIREBASE_URL + SUGGESTIONS_PATH, { 
+                        method: 'PUT', 
+                        headers: {'Content-Type': 'application/json'}, 
+                        body: JSON.stringify(allSuggestions) 
+                    });
+                }
+                
+                showNotification(`❌ Номинация "${suggName}" отклонена`, 'error');
+                await loadData();
+            } catch (e) {
+                showNotification('❌ Ошибка: ' + e.message, 'error');
+            }
+        }
+
+        // --- ДОБАВЛЕНИЕ ГОЛОСА ---
         function renderAddVoteCheckboxes() {
             const container = document.getElementById('addVoteCheckboxes');
             if (nomsList.length === 0) {
@@ -395,11 +556,8 @@
             const countEl = document.getElementById('selectedCount');
             countEl.textContent = `Выбрано: ${count}/6`;
             
-            if (count === 6) {
-                countEl.className = 'selected-count valid';
-            } else {
-                countEl.className = 'selected-count invalid';
-            }
+            if (count === 6) countEl.className = 'selected-count valid';
+            else countEl.className = 'selected-count invalid';
         }
 
         async function addVoteForUser() {
@@ -407,13 +565,11 @@
             const checkboxes = document.querySelectorAll('#addVoteCheckboxes input[type="checkbox"]:checked');
             const selectedNoms = Array.from(checkboxes).map(cb => cb.value);
             
-            // Валидация
             if (!userInput) {
                 showNotification('❌ Введите ФИО и класс пользователя!', 'error');
                 return;
             }
             
-            // Проверка формата (должно содержать |)
             if (!userInput.includes('|')) {
                 showNotification('❌ Неверный формат! Используйте: Иванов Иван|11В', 'error');
                 return;
@@ -424,7 +580,6 @@
                 return;
             }
             
-            // Проверка: существует ли уже пользователь
             if (allVotes[userInput]) {
                 const existingVotes = firebaseToArray(allVotes[userInput]);
                 const confirmOverwrite = confirm(
@@ -446,12 +601,10 @@
                 
                 showNotification(`✅ Голос для "${userInput}" успешно добавлен!`, 'success');
                 
-                // Очистка формы
                 document.getElementById('addVoteUser').value = '';
                 checkboxes.forEach(cb => cb.checked = false);
                 updateAddVoteCount();
                 
-                // Обновление таблицы
                 renderVotes();
             } catch (e) {
                 showNotification('❌ Ошибка при сохранении: ' + e.message, 'error');
